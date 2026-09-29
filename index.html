@@ -1,0 +1,755 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Word Sprint</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;600;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#EAF2F8; --panel:#FFFFFF; --ink:#13233A; --muted:#5B6B80; --line:#C9D6E3;
+  --key:#FFFFFF; --keyedge:#AFC0D2; --gold:#E8A200; --goldsoft:#FFF3CC;
+  --good:#1F8F7A; --bad:#D13F3F; --accent:#2F6FB5;
+  --pinky:#F7CFDC; --ring:#FFE3AE; --middle:#CDEBC6; --index:#C3DEF6; --thumb:#E3E0F5;
+  --grey:#DCE3EA; --greyink:#9AA7B5;
+  color-scheme:light;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0F1A28; --panel:#17263A; --ink:#EAF1F8; --muted:#9FB0C4; --line:#2A3D55;
+    --key:#1F3149; --keyedge:#0A131E; --gold:#FFC23D; --goldsoft:#3A3014;
+    --good:#39C2A6; --bad:#FF6B6B; --accent:#6FA8E8;
+    --pinky:#5A2E3D; --ring:#5A4722; --middle:#2F4E2B; --index:#24445F; --thumb:#3A3656;
+    --grey:#223247; --greyink:#5E6F84; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0F1A28; --panel:#17263A; --ink:#EAF1F8; --muted:#9FB0C4; --line:#2A3D55;
+  --key:#1F3149; --keyedge:#0A131E; --gold:#FFC23D; --goldsoft:#3A3014;
+  --good:#39C2A6; --bad:#FF6B6B; --accent:#6FA8E8;
+  --pinky:#5A2E3D; --ring:#5A4722; --middle:#2F4E2B; --index:#24445F; --thumb:#3A3656;
+  --grey:#223247; --greyink:#5E6F84; color-scheme:dark;
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:border-box}
+body{
+  margin:0; background:var(--bg); color:var(--ink);
+  font-family:"Lexend", "Segoe UI", system-ui, -apple-system, sans-serif;
+  font-weight:400; line-height:1.45;
+}
+button{font:inherit; color:inherit; cursor:pointer}
+button:focus-visible, textarea:focus-visible, input:focus-visible{outline:3px solid var(--accent); outline-offset:2px}
+
+.wrap{max-width:980px; margin:0 auto; padding:20px 20px 40px}
+
+/* Header */
+header{display:flex; justify-content:space-between; align-items:flex-start; gap:16px; flex-wrap:wrap}
+.brand h1{margin:0; font-size:1.6rem; font-weight:800; letter-spacing:-.01em}
+.brand p{margin:2px 0 0; color:var(--muted); font-size:.95rem}
+.days{display:flex; gap:8px; align-items:stretch}
+.day{
+  width:56px; height:64px; border:2px solid var(--line); border-radius:10px; background:var(--panel);
+  display:flex; flex-direction:column; align-items:center; justify-content:flex-start; padding-top:5px;
+}
+.day .l{font-weight:600; font-size:.95rem}
+.day .s{font-size:1.6rem; line-height:1; margin-top:2px; color:var(--gold)}
+.day.off{background:var(--grey); border-color:var(--grey); color:var(--greyink)}
+.day.today{border-color:var(--accent); box-shadow:0 0 0 2px var(--accent) inset}
+.day.starred{background:var(--goldsoft); border-color:var(--gold)}
+.day.pop .s{animation:pop .6s ease-out}
+@keyframes pop{0%{transform:scale(0) rotate(-40deg)}70%{transform:scale(1.4) rotate(10deg)}100%{transform:scale(1)}}
+
+/* Stage */
+.stage{
+  margin-top:22px; background:var(--panel); border:2px solid var(--line); border-radius:18px;
+  padding:22px 20px 26px; text-align:center;
+}
+.timer{font-size:clamp(2.2rem,7vw,3.4rem); font-weight:300; font-variant-numeric:tabular-nums; letter-spacing:-.02em}
+.timer.run{color:var(--accent)}
+.hint{color:var(--muted); margin:2px 0 0; min-height:1.5em}
+.word{
+  margin:22px 0 10px; font-size:clamp(2.6rem,11vw,5.2rem); font-weight:600; letter-spacing:.06em;
+  min-height:1.3em; line-height:1.2; word-break:break-all;
+}
+.word span{display:inline-block; min-width:.55em}
+.word .done{color:var(--good)}
+.word .now{color:var(--ink); border-bottom:6px solid var(--accent)}
+.word .todo{color:var(--greyink)}
+.word.shake{animation:shake .28s}
+@keyframes shake{0%,100%{transform:none}25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+.dots{display:flex; justify-content:center; gap:6px; flex-wrap:wrap; min-height:12px}
+.dots i{width:12px; height:12px; border-radius:50%; background:var(--grey)}
+.dots i.d{background:var(--good)}
+.dots i.c{background:var(--accent)}
+
+.study{display:flex; flex-wrap:wrap; justify-content:center; gap:8px 10px; margin:18px auto 4px; max-width:720px}
+.study span{padding:6px 12px; border:2px solid var(--line); border-radius:8px; font-size:1.15rem}
+.result{margin:10px 0 0; font-size:1.1rem; min-height:1.5em}
+.result b{font-weight:600}
+
+.actions{display:flex; justify-content:center; gap:10px; margin-top:18px; flex-wrap:wrap}
+.btn{
+  border:2px solid var(--keyedge); background:var(--key); border-radius:10px; padding:10px 18px;
+  box-shadow:0 3px 0 var(--keyedge); font-weight:600;
+}
+.btn:active{transform:translateY(2px); box-shadow:0 1px 0 var(--keyedge)}
+.btn.primary{background:var(--accent); border-color:var(--accent); color:#fff; box-shadow:0 3px 0 color-mix(in srgb, var(--accent) 60%, #000)}
+.btn kbd{font:inherit; font-weight:300; opacity:.8; margin-left:6px}
+
+/* Keyboard */
+.kbd{margin:26px auto 0; display:flex; flex-direction:column; gap:7px; align-items:center; --k:clamp(24px,7.4vw,56px)}
+.row{display:flex; gap:6px}
+.key{
+  width:var(--k); height:var(--k); border-radius:9px; border:1px solid var(--keyedge);
+  box-shadow:0 3px 0 var(--keyedge); display:flex; align-items:center; justify-content:center;
+  font-size:calc(var(--k) * .36); font-weight:600; position:relative; transition:transform .06s;
+}
+.key.pinky{background:var(--pinky)} .key.ring{background:var(--ring)}
+.key.middle{background:var(--middle)} .key.index{background:var(--index)} .key.thumb{background:var(--thumb)}
+.key.space{width:calc(var(--k) * 6.2)}
+.key.bump::after{content:""; position:absolute; bottom:18%; width:26%; height:3px; border-radius:2px; background:var(--ink); opacity:.55}
+.key.next{outline:4px solid var(--accent); outline-offset:2px; transform:translateY(-2px)}
+.key.hit{transform:translateY(3px); box-shadow:0 0 0 var(--keyedge)}
+.key.miss{background:var(--bad); color:#fff}
+.finger{margin-top:12px; color:var(--muted); min-height:1.5em}
+.finger b{color:var(--ink); font-weight:600}
+
+/* Stats */
+.stats{margin-top:18px; display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:12px}
+.stat{background:var(--panel); border:2px solid var(--line); border-radius:12px; padding:12px 14px}
+.stat h2{margin:0 0 4px; font-size:.9rem; font-weight:400; color:var(--muted)}
+.stat .v{font-size:1.35rem; font-weight:600; font-variant-numeric:tabular-nums}
+.stat ol{margin:0; padding-left:1.3em; font-variant-numeric:tabular-nums; max-height:7.5em; overflow:auto}
+.foot{display:flex; justify-content:space-between; align-items:center; margin-top:18px; gap:10px; flex-wrap:wrap; color:var(--muted); font-size:.9rem}
+.linkbtn{background:none; border:none; color:var(--accent); text-decoration:underline; padding:4px}
+
+/* Modals */
+.modal{position:fixed; inset:0; background:rgba(8,16,28,.55); display:none; align-items:center; justify-content:center; padding:20px; z-index:20}
+.modal.open{display:flex}
+.card{background:var(--panel); color:var(--ink); border-radius:18px; padding:24px; width:min(560px,100%); max-height:90vh; overflow:auto; border:2px solid var(--line)}
+.card h2{margin:0 0 6px; font-size:1.4rem}
+.card label{display:block; margin:14px 0 6px; font-weight:600}
+.card textarea{width:100%; min-height:110px; border:2px solid var(--line); border-radius:10px; padding:10px; font:inherit; background:var(--bg); color:var(--ink)}
+.card .note{color:var(--muted); font-size:.9rem; margin:6px 0 0}
+.card input[type=password], .card select{width:100%; border:2px solid var(--line); border-radius:10px; padding:10px; font:inherit; background:var(--bg); color:var(--ink); margin-top:8px}
+.study span{cursor:pointer}
+.study span:hover{border-color:var(--accent)}
+.weekpick{display:flex; align-items:center; gap:12px}
+.weekpick b{min-width:5.5em; text-align:center; font-size:1.1rem}
+.radio{display:flex; gap:8px; align-items:center; font-weight:400; margin:6px 0}
+.card .actions{justify-content:flex-start}
+.danger{border-color:var(--bad); color:var(--bad)}
+
+.award .card{text-align:center; border-color:var(--gold); background:linear-gradient(var(--goldsoft), var(--panel) 55%)}
+.award h2{font-size:2rem; font-weight:800; margin-top:6px}
+.award .stars{font-size:2.2rem; color:var(--gold); letter-spacing:.2em; margin:6px 0}
+.trophy{width:140px; height:140px; animation:rise .8s ease-out}
+@keyframes rise{from{transform:translateY(30px) scale(.6); opacity:0}to{transform:none; opacity:1}}
+#confetti{position:fixed; inset:0; pointer-events:none; z-index:30}
+
+.toastbox{position:fixed; left:0; right:0; bottom:0; display:flex; justify-content:center; padding:0 16px calc(18px + env(safe-area-inset-bottom,0px)); pointer-events:none; z-index:25}
+.toast{background:var(--ink); color:var(--bg); padding:12px 18px; border-radius:12px; font-weight:600; opacity:0; transform:translateY(12px); transition:.25s}
+.toast.show{opacity:1; transform:none}
+
+@media (max-width:560px){
+  .day{width:46px; height:56px}
+  .day .s{font-size:1.3rem}
+  .wrap{padding:14px 12px 30px}
+}
+@media (prefers-reduced-motion: reduce){
+  *{animation:none !important; transition:none !important}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="brand">
+      <h1>Word Sprint</h1>
+      <p id="weekLabel">Week 1</p>
+    </div>
+    <div class="days" id="days" aria-label="Stars this week"></div>
+  </header>
+
+  <section class="stage" aria-live="polite">
+    <div class="timer" id="timer">0.0 s</div>
+    <p class="hint" id="hint"></p>
+    <div class="word" id="word"></div>
+    <div class="dots" id="dots"></div>
+    <div class="study" id="study"></div>
+    <p class="result" id="result"></p>
+    <div class="actions" id="actions"></div>
+
+    <div class="kbd" id="kbd" aria-hidden="true"></div>
+    <p class="finger" id="finger"></p>
+  </section>
+
+  <section class="stats">
+    <div class="stat"><h2>Time to beat today</h2><div class="v" id="toBeat">None yet</div></div>
+    <div class="stat"><h2>Your best today</h2><div class="v" id="bestToday">None yet</div></div>
+    <div class="stat"><h2>Tries today</h2><ol id="tries"></ol></div>
+  </section>
+
+  <div class="foot">
+    <span id="footNote"></span>
+    <span>
+      <button class="linkbtn" id="seeAward" hidden>See this week's award</button>
+      <button class="linkbtn" id="openParent">Parent settings</button>
+    </span>
+  </div>
+</div>
+
+<!-- Parent settings -->
+<div class="modal" id="parent" role="dialog" aria-modal="true" aria-labelledby="pTitle">
+  <div class="card">
+    <h2 id="pTitle">Parent settings</h2>
+    <p class="note">Weeks move forward on their own every Monday. Use this to jump ahead, go back, or swap in your own words.</p>
+
+    <label>Current week</label>
+    <div class="weekpick">
+      <button class="btn" id="wkMinus" aria-label="Previous week">−</button>
+      <b id="wkShow">Week 1</b>
+      <button class="btn" id="wkPlus" aria-label="Next week">+</button>
+    </div>
+
+    <label>Practice style</label>
+    <div class="radio"><input type="radio" name="mode" id="modeSee" value="see"><span><b>See the word</b> — the word is shown and the next key lights up. Best for learning the keyboard.</span></div>
+    <div class="radio"><input type="radio" name="mode" id="modeHear" value="hear"><span><b>Hear the word</b> — the word is read aloud and hidden. Best for spelling. The key lights up after two misses.</span></div>
+    <p class="note">Keep the same style all week so the daily times are fair to compare.</p>
+
+    <label for="wordsBox">Words for this week</label>
+    <textarea id="wordsBox" spellcheck="false"></textarea>
+    <p class="note" id="wordsNote">One word per line, or separate with commas. Letters only.</p>
+    <div class="actions">
+      <button class="btn primary" id="saveWords">Save words</button>
+      <button class="btn" id="builtIn">Use built-in list</button>
+    </div>
+
+    <label for="elKey">ElevenLabs voice</label>
+    <input type="password" id="elKey" autocomplete="off" placeholder="Paste your ElevenLabs API key">
+    <div class="actions"><button class="btn" id="elLoad">Load my voices</button></div>
+    <select id="elVoice" aria-label="Voice"><option value="">Browser voice (no ElevenLabs)</option></select>
+    <div class="actions">
+      <button class="btn primary" id="elSave">Save voice</button>
+      <button class="btn" id="elTest">Save and test</button>
+      <button class="btn" id="elClear">Remove key</button>
+    </div>
+    <p class="note" id="elNote">Each word is fetched once, then saved on this device, so it only uses credits the first time.</p>
+
+    <label>Reset</label>
+    <div class="actions">
+      <button class="btn danger" id="resetWeek">Clear this week's times</button>
+      <button class="btn danger" id="resetAll">Start over from week 1</button>
+    </div>
+
+    <div class="actions" style="margin-top:22px"><button class="btn" id="closeParent">Done</button></div>
+  </div>
+</div>
+
+<!-- Award -->
+<div class="modal award" id="award" role="dialog" aria-modal="true" aria-labelledby="aTitle">
+  <div class="card">
+    <svg class="trophy" viewBox="0 0 120 120" aria-hidden="true">
+      <path d="M36 18h48v22c0 16-10 30-24 30S36 56 36 40z" fill="#F5B400" stroke="#B37F00" stroke-width="3"/>
+      <path d="M36 26H20c0 16 8 24 20 26M84 26h16c0 16-8 24-20 26" fill="none" stroke="#B37F00" stroke-width="5" stroke-linecap="round"/>
+      <rect x="54" y="70" width="12" height="16" fill="#E0A300" stroke="#B37F00" stroke-width="3"/>
+      <rect x="38" y="86" width="44" height="12" rx="3" fill="#8A5A2B" stroke="#5E3C1B" stroke-width="3"/>
+      <rect x="32" y="98" width="56" height="10" rx="3" fill="#6B4421" stroke="#4A2E15" stroke-width="3"/>
+      <path d="M60 28l4 8 9 1-7 6 2 9-8-5-8 5 2-9-7-6 9-1z" fill="#FFF3B0"/>
+    </svg>
+    <h2 id="aTitle">Week 1 champion!</h2>
+    <div class="stars" aria-label="Four stars">★★★★</div>
+    <p id="aText">You beat your time on Tuesday, Wednesday, Thursday and Friday. That's a full week of getting faster.</p>
+    <div class="actions" style="justify-content:center"><button class="btn primary" id="closeAward">Close</button></div>
+  </div>
+</div>
+
+<canvas id="confetti"></canvas>
+<div class="toastbox"><div class="toast" id="toast"></div></div>
+
+<script>
+/* ---------- Word lists: week 1 has 5 words, each week adds one, words get longer ---------- */
+const WORDS = [
+  ["cat","dog","sun","hat","run"],
+  ["jump","fish","milk","cake","desk","frog"],
+  ["ship","bell","star","lamp","road","wolf","gift"],
+  ["plant","truck","cloud","brick","sheep","chair","storm","grape"],
+  ["beach","light","smile","green","stone","bread","water","happy","train"],
+  ["friend","planet","garden","rocket","basket","window","flower","circle","bridge","jungle"],
+  ["castle","dragon","silver","winter","summer","animal","pencil","number","travel","forest","market"],
+  ["monster","picture","kitchen","blanket","capture","weather","holiday","library","whisper","thunder","chicken","balance"],
+  ["shoulder","champion","mountain","question","sandwich","elephant","keyboard","treasure","dinosaur","midnight","practice","surprise","building"],
+  ["calendar","favorite","language","exercise","hospital","strength","alphabet","vacation","remember","together","straight","neighbor","sentence","pleasant"],
+  ["adventure","beautiful","chocolate","different","important","knowledge","dangerous","telescope","principal","celebrate","character","invisible","necessary","carefully","yesterday"],
+  ["government","experiment","restaurant","dictionary","temperature","instrument","lighthouse","background","microphone","playground","impossible","basketball","thoughtful","laboratory","attendance","especially"]
+];
+
+const ROWS = [
+  ["q","w","e","r","t","y","u","i","o","p"],
+  ["a","s","d","f","g","h","j","k","l",";"],
+  ["z","x","c","v","b","n","m",",",".","/"]
+];
+const FINGER = {q:"lp",a:"lp",z:"lp",w:"lr",s:"lr",x:"lr",e:"lm",d:"lm",c:"lm",
+  r:"li",f:"li",v:"li",t:"li",g:"li",b:"li",y:"ri",h:"ri",n:"ri",u:"ri",j:"ri",m:"ri",
+  i:"rm",k:"rm",",":"rm",o:"rr",l:"rr",".":"rr",p:"rp",";":"rp","/":"rp"," ":"th"};
+const FINGER_NAME = {lp:"left pinky",lr:"left ring finger",lm:"left middle finger",li:"left pointer finger",
+  ri:"right pointer finger",rm:"right middle finger",rr:"right ring finger",rp:"right pinky",th:"thumb"};
+const FINGER_CLASS = {lp:"pinky",rp:"pinky",lr:"ring",rr:"ring",lm:"middle",rm:"middle",li:"index",ri:"index",th:"thumb"};
+const DAY_LETTERS = ["M","T","W","T","F"];
+const DAY_NAMES = ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"];
+
+/* ---------- Saved progress (stays on this device and browser) ---------- */
+const STORE = "word-sprint-v1";
+function load(){ try{ const s = localStorage.getItem(STORE); if(s) return JSON.parse(s); }catch(e){} return null; }
+function save(){ try{ localStorage.setItem(STORE, JSON.stringify(state)); }catch(e){} }
+
+function mondayOf(d){ const x = new Date(d.getFullYear(), d.getMonth(), d.getDate()); x.setDate(x.getDate() - ((x.getDay()+6)%7)); return x; }
+function ymd(d){ return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
+function parseYmd(s){ const p = s.split("-").map(Number); return new Date(p[0], p[1]-1, p[2]); }
+
+let state = load() || {};
+if(!state.startMonday) state.startMonday = ymd(mondayOf(new Date()));
+if(typeof state.weekOffset !== "number") state.weekOffset = 0;
+if(!state.mode) state.mode = "see";
+if(!state.custom) state.custom = {};
+if(!state.weeks) state.weeks = {};
+save();
+
+function currentWeek(){
+  const diff = Math.round((mondayOf(new Date()) - parseYmd(state.startMonday)) / 86400000);
+  return Math.max(1, Math.floor(diff/7) + 1 + state.weekOffset);
+}
+function todayIdx(){ return (new Date().getDay()+6)%7; } // 0 = Monday ... 6 = Sunday
+function wordsFor(w){
+  if(state.custom[w] && state.custom[w].length) return state.custom[w];
+  return WORDS[Math.min(w, WORDS.length) - 1];
+}
+function wk(w){ if(!state.weeks[w]) state.weeks[w] = {days:{}, awarded:false}; return state.weeks[w]; }
+function prevBest(w, d){
+  const days = wk(w).days;
+  for(let k = d-1; k >= 0; k--){ if(days[k] && days[k].best) return {k, ms:days[k].best}; }
+  return null;
+}
+function hasStar(w, d){
+  if(d < 1 || d > 4) return false;
+  const cur = wk(w).days[d] && wk(w).days[d].best;
+  const p = prevBest(w, d);
+  return !!(cur && p && cur < p.ms);
+}
+function allStars(w){ return [1,2,3,4].every(d => hasStar(w, d)); }
+
+/* ---------- Elements ---------- */
+const $ = id => document.getElementById(id);
+const el = {days:$("days"), weekLabel:$("weekLabel"), timer:$("timer"), hint:$("hint"), word:$("word"), dots:$("dots"),
+  study:$("study"), result:$("result"), actions:$("actions"), kbd:$("kbd"), finger:$("finger"),
+  toBeat:$("toBeat"), bestToday:$("bestToday"), tries:$("tries"), footNote:$("footNote"), seeAward:$("seeAward")};
+
+function fmt(ms){
+  const s = ms/1000;
+  if(s < 60) return s.toFixed(1) + " s";
+  const m = Math.floor(s/60); return m + ":" + (s%60).toFixed(1).padStart(4,"0");
+}
+
+/* ---------- Keyboard ---------- */
+const keyEls = {};
+function buildKeyboard(){
+  ROWS.forEach((row, r) => {
+    const rowEl = document.createElement("div"); rowEl.className = "row";
+    if(r === 1) rowEl.style.marginLeft = "calc(var(--k) * .5)";
+    if(r === 2) rowEl.style.marginLeft = "calc(var(--k) * 1.1)";
+    row.forEach(k => {
+      const kEl = document.createElement("div");
+      kEl.className = "key " + FINGER_CLASS[FINGER[k]] + ((k==="f"||k==="j") ? " bump" : "");
+      kEl.textContent = k;
+      rowEl.appendChild(kEl); keyEls[k] = kEl;
+    });
+    el.kbd.appendChild(rowEl);
+  });
+  const sp = document.createElement("div"); sp.className = "row";
+  const s = document.createElement("div"); s.className = "key thumb space"; keyEls[" "] = s;
+  sp.appendChild(s); el.kbd.appendChild(sp);
+}
+function highlight(k){
+  Object.values(keyEls).forEach(e => e.classList.remove("next"));
+  if(k && keyEls[k]) keyEls[k].classList.add("next");
+}
+function flashKey(k, ok){
+  const e = keyEls[k]; if(!e) return;
+  e.classList.add(ok ? "hit" : "miss");
+  setTimeout(() => e.classList.remove("hit","miss"), ok ? 90 : 220);
+}
+
+/* ---------- Speech: ElevenLabs voice, cached on this device, browser voice as backup ---------- */
+const EL_API = "https://api.elevenlabs.io/v1";
+const EL_MODEL = "eleven_multilingual_v2";
+if(!state.voice) state.voice = {key:"", voiceId:"", voiceName:""};
+const clipCache = new Map();
+let elFailed = false, player = null, prefetchKey = "";
+
+let dbp = null;
+function db(){
+  if(dbp) return dbp;
+  dbp = new Promise(res => {
+    try{
+      const r = indexedDB.open("word-sprint-audio", 1);
+      r.onupgradeneeded = () => r.result.createObjectStore("clips");
+      r.onsuccess = () => res(r.result); r.onerror = () => res(null);
+    }catch(e){ res(null); }
+  });
+  return dbp;
+}
+async function dbGet(k){
+  const d = await db(); if(!d) return null;
+  return new Promise(res => { try{ const q = d.transaction("clips").objectStore("clips").get(k); q.onsuccess = () => res(q.result || null); q.onerror = () => res(null); }catch(e){ res(null); } });
+}
+async function dbPut(k, v){ const d = await db(); if(!d) return; try{ d.transaction("clips","readwrite").objectStore("clips").put(v, k); }catch(e){} }
+
+function useEleven(){ return !!(state.voice.key && state.voice.voiceId) && !elFailed; }
+
+function getClip(word){
+  const k = state.voice.voiceId + ":" + word;
+  if(clipCache.has(k)) return clipCache.get(k);
+  const p = (async () => {
+    let blob = await dbGet(k);
+    if(!blob){
+      const r = await fetch(`${EL_API}/text-to-speech/${encodeURIComponent(state.voice.voiceId)}?output_format=mp3_44100_128`, {
+        method:"POST",
+        headers:{"xi-api-key":state.voice.key, "Content-Type":"application/json", "Accept":"audio/mpeg"},
+        body:JSON.stringify({text:word, model_id:EL_MODEL})
+      });
+      if(!r.ok) throw new Error("ElevenLabs error " + r.status);
+      blob = await r.blob();
+      dbPut(k, blob);
+    }
+    return URL.createObjectURL(blob);
+  })();
+  clipCache.set(k, p);
+  p.catch(() => clipCache.delete(k));
+  return p;
+}
+
+function browserSpeak(text){
+  try{
+    if(!("speechSynthesis" in window)) return;
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text); u.rate = 0.8; speechSynthesis.speak(u);
+  }catch(e){}
+}
+
+async function speak(word){
+  if(useEleven()){
+    let url = null;
+    try{ url = await getClip(word); }
+    catch(e){
+      elFailed = true;
+      toast("The ElevenLabs voice can't be reached here, so the browser voice is reading instead.");
+    }
+    if(url){
+      try{ if(player) player.pause(); player = new Audio(url); await player.play(); }catch(e){}
+      return;
+    }
+  }
+  browserSpeak(word);
+}
+
+// Fetch the week's words one at a time ahead of practice so there's no wait mid-try
+async function prefetch(words){
+  if(!useEleven()) return;
+  const key = state.voice.voiceId + "|" + words.join(",");
+  if(key === prefetchKey) return;
+  prefetchKey = key;
+  for(const w of words){ try{ await getClip(w); }catch(e){ return; } }
+}
+
+async function loadVoices(key){
+  const r = await fetch(`${EL_API}/voices`, {headers:{"xi-api-key":key}});
+  if(!r.ok) throw new Error("error " + r.status);
+  const d = await r.json();
+  return (d.voices || []).map(v => ({id:v.voice_id, name:v.name})).sort((a,b) => a.name.localeCompare(b.name));
+}
+
+/* ---------- A try ---------- */
+let run = {active:false, order:[], wi:0, ci:0, errors:0, t0:0, miss:0};
+
+function shuffle(a){ a = a.slice(); for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+
+function startTry(){
+  run = {active:true, order:shuffle(wordsFor(currentWeek())), wi:0, ci:0, errors:0, t0:0, miss:0};
+  el.result.textContent = "";
+  el.timer.textContent = "0.0 s";
+  el.timer.classList.add("run");
+  speak(run.order[0]);
+  render();
+}
+function stopTry(){
+  run.active = false; el.timer.classList.remove("run");
+  el.result.textContent = "Try stopped. It won't count.";
+  render();
+}
+function tick(){
+  if(!run.active || !run.t0) return;
+  el.timer.textContent = fmt(performance.now() - run.t0);
+  requestAnimationFrame(tick);
+}
+function finishTry(){
+  const ms = performance.now() - run.t0;
+  run.active = false; el.timer.classList.remove("run"); el.timer.textContent = fmt(ms);
+  const w = currentWeek(), d = todayIdx();
+  let msg = `Finished in <b>${fmt(ms)}</b> with ${run.errors} ${run.errors===1?"slip":"slips"}.`;
+
+  if(d <= 4){
+    const rec = wk(w).days[d] || (wk(w).days[d] = {best:null, tries:[]});
+    const hadStar = hasStar(w, d);
+    const oldBest = rec.best;
+    rec.tries.push({ms:Math.round(ms), errors:run.errors});
+    if(!rec.best || ms < rec.best) rec.best = Math.round(ms);
+    save();
+
+    if(oldBest && ms < oldBest) msg += " New best for today!";
+    if(!hadStar && hasStar(w, d)){
+      const p = prevBest(w, d);
+      toast(`Star earned! ${((p.ms - ms)/1000).toFixed(1)} s faster than ${DAY_NAMES[p.k]}.`);
+      renderDays(d);
+      if(allStars(w) && !wk(w).awarded){
+        wk(w).awarded = true; save();
+        setTimeout(() => showAward(w), 1200);
+      }
+    }
+  }
+  el.result.innerHTML = msg;
+  render();
+}
+
+document.addEventListener("keydown", e => {
+  if(document.querySelector(".modal.open")){
+    if(e.key === "Escape") closeModals();
+    return;
+  }
+  if(e.ctrlKey || e.metaKey || e.altKey) return;
+
+  if(!run.active){
+    if(e.key === " " || e.key === "Enter"){ e.preventDefault(); startTry(); }
+    return;
+  }
+  if(e.key === "Escape"){ stopTry(); return; }
+  if(e.key === "Enter"){ e.preventDefault(); speak(run.order[run.wi]); return; }
+  if(e.key.length !== 1) return;
+  e.preventDefault();
+
+  const k = e.key.toLowerCase();
+  const word = run.order[run.wi];
+  const need = word[run.ci];
+  if(!run.t0){ run.t0 = performance.now(); requestAnimationFrame(tick); }
+
+  if(k === need){
+    flashKey(k, true);
+    run.ci++; run.miss = 0;
+    if(run.ci >= word.length){
+      run.wi++; run.ci = 0;
+      if(run.wi >= run.order.length){ finishTry(); return; }
+      setTimeout(() => speak(run.order[run.wi]), 150);
+    }
+  } else {
+    flashKey(k, false);
+    run.errors++; run.miss++;
+    el.word.classList.remove("shake"); void el.word.offsetWidth; el.word.classList.add("shake");
+  }
+  renderWord();
+});
+
+/* ---------- Rendering ---------- */
+function renderDays(popIdx){
+  const w = currentWeek(), t = todayIdx();
+  el.days.innerHTML = "";
+  DAY_LETTERS.forEach((L, i) => {
+    const b = document.createElement("div");
+    const star = hasStar(w, i);
+    b.className = "day" + (i===0 ? " off" : "") + (i===t ? " today" : "") + (star ? " starred" : "") + (i===popIdx ? " pop" : "");
+    b.innerHTML = `<span class="l">${L}</span><span class="s">${star ? "★" : ""}</span>`;
+    b.setAttribute("aria-label", DAY_NAMES[i] + (i===0 ? ", starting day" : star ? ", star earned" : ", no star yet"));
+    el.days.appendChild(b);
+  });
+}
+
+function renderWord(){
+  const hear = state.mode === "hear";
+  if(!run.active){
+    el.word.innerHTML = ""; el.dots.innerHTML = "";
+    highlight(null); el.finger.textContent = "Rest your fingers on the home row. Feel the bumps on F and J.";
+    return;
+  }
+  const word = run.order[run.wi];
+  el.word.innerHTML = [...word].map((ch, i) => {
+    const cls = i < run.ci ? "done" : i === run.ci ? "now" : "todo";
+    const show = (hear && i >= run.ci) ? "_" : ch;
+    return `<span class="${cls}">${show}</span>`;
+  }).join("");
+  el.dots.innerHTML = run.order.map((_, i) => `<i class="${i < run.wi ? "d" : i === run.wi ? "c" : ""}"></i>`).join("");
+
+  const next = word[run.ci];
+  const showKey = !hear || run.miss >= 2;
+  highlight(showKey ? next : null);
+  el.finger.innerHTML = showKey
+    ? `Use your <b>${FINGER_NAME[FINGER[next]] || "finger"}</b>. Press Enter to hear the word again.`
+    : "Listen, then spell it. Press Enter to hear it again.";
+  el.hint.textContent = run.t0 ? `Word ${run.wi+1} of ${run.order.length}` : "The clock starts with your first letter.";
+}
+
+function render(){
+  const w = currentWeek(), d = todayIdx();
+  const words = wordsFor(w);
+  el.weekLabel.textContent = `Week ${w}: ${words.length} words to practice`;
+  renderDays();
+
+  // Study list while resting
+  el.study.innerHTML = run.active ? "" : words.map(x => `<span title="Hear this word">${x}</span>`).join("");
+  if(!run.active) prefetch(words);
+  if(!run.active){
+    el.hint.textContent = d > 4 ? "Weekend practice. Stars start again on Monday." : "Study the words, then start a try.";
+  }
+
+  // Buttons
+  el.actions.innerHTML = "";
+  const addBtn = (label, key, fn, primary) => {
+    const b = document.createElement("button"); b.className = "btn" + (primary ? " primary" : "");
+    b.innerHTML = `${label}<kbd>${key}</kbd>`; b.onclick = e => { e.currentTarget.blur(); fn(); }; el.actions.appendChild(b);
+  };
+  if(run.active){
+    addBtn("Say it again", "Enter", () => speak(run.order[run.wi]));
+    addBtn("Stop try", "Esc", stopTry);
+  } else {
+    addBtn("Start a try", "Space", startTry, true);
+  }
+
+  // Stats
+  const rec = d <= 4 ? wk(w).days[d] : null;
+  const p = d <= 4 ? prevBest(w, d) : null;
+  if(d === 0) el.toBeat.textContent = "Monday sets the time";
+  else if(d > 4) el.toBeat.textContent = "Rest day";
+  else el.toBeat.textContent = p ? `${fmt(p.ms)} (${DAY_NAMES[p.k]})` : "None yet";
+  el.bestToday.textContent = rec && rec.best ? fmt(rec.best) : "None yet";
+  el.tries.innerHTML = rec && rec.tries.length
+    ? rec.tries.map(t => `<li>${fmt(t.ms)}, ${t.errors} ${t.errors===1?"slip":"slips"}</li>`).join("")
+    : "<li>No tries yet</li>";
+
+  el.footNote.textContent = d === 0
+    ? "Today sets your starting time. Beat it tomorrow to earn a star."
+    : d <= 4 ? "Beat your time from the day before to earn today's star." : "";
+  el.seeAward.hidden = !wk(w).awarded;
+
+  renderWord();
+}
+
+/* ---------- Toast ---------- */
+let toastTimer;
+function toast(t){
+  const e = $("toast"); e.textContent = t; e.classList.add("show");
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => e.classList.remove("show"), 3200);
+}
+
+/* ---------- Award ---------- */
+function showAward(w){
+  $("aTitle").textContent = `Week ${w} champion!`;
+  $("award").classList.add("open");
+  $("closeAward").focus();
+  confetti();
+}
+function confetti(){
+  if(window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  const c = $("confetti"), ctx = c.getContext("2d");
+  c.width = innerWidth; c.height = innerHeight;
+  const colors = ["#F5B400","#2F6FB5","#1F8F7A","#D13F3F","#9B6BD3","#F7A1C4"];
+  const bits = Array.from({length:160}, () => ({x:Math.random()*c.width, y:-Math.random()*c.height*.6,
+    w:6+Math.random()*6, h:8+Math.random()*8, vy:2+Math.random()*3, vx:-1.5+Math.random()*3,
+    r:Math.random()*6, vr:-.2+Math.random()*.4, col:colors[Math.floor(Math.random()*colors.length)]}));
+  const end = performance.now() + 3500;
+  (function frame(now){
+    ctx.clearRect(0,0,c.width,c.height);
+    bits.forEach(b => { b.x+=b.vx; b.y+=b.vy; b.r+=b.vr; ctx.save(); ctx.translate(b.x,b.y); ctx.rotate(b.r); ctx.fillStyle=b.col; ctx.fillRect(-b.w/2,-b.h/2,b.w,b.h); ctx.restore(); });
+    if(now < end) requestAnimationFrame(frame); else ctx.clearRect(0,0,c.width,c.height);
+  })(performance.now());
+}
+
+/* ---------- Parent settings ---------- */
+function fillVoiceSelect(list){
+  const sel = $("elVoice");
+  sel.innerHTML = '<option value="">Browser voice (no ElevenLabs)</option>';
+  list.forEach(v => { const o = document.createElement("option"); o.value = v.id; o.textContent = v.name; sel.appendChild(o); });
+  sel.value = state.voice.voiceId && list.some(v => v.id === state.voice.voiceId) ? state.voice.voiceId : (list[0] ? list[0].id : "");
+}
+function saveVoice(){
+  const sel = $("elVoice");
+  state.voice = {key:$("elKey").value.trim(), voiceId:sel.value, voiceName:sel.value ? sel.options[sel.selectedIndex].textContent : ""};
+  elFailed = false; prefetchKey = ""; clipCache.clear(); save();
+  $("elNote").textContent = state.voice.voiceId && state.voice.key
+    ? `Saved. Words will be read by ${state.voice.voiceName}.`
+    : "Saved. The browser voice will read the words.";
+}
+function openParent(){
+  if(run.active) stopTry();
+  const w = currentWeek();
+  $("elKey").value = state.voice.key || "";
+  fillVoiceSelect(state.voice.voiceId ? [{id:state.voice.voiceId, name:state.voice.voiceName || "Saved voice"}] : []);
+  $("wkShow").textContent = `Week ${w}`;
+  $("modeSee").checked = state.mode === "see";
+  $("modeHear").checked = state.mode === "hear";
+  $("wordsBox").value = wordsFor(w).join("\n");
+  $("wordsNote").textContent = (state.custom[w] ? "Using your own words for this week. " : "Using the built-in list. ")
+    + (w > WORDS.length && !state.custom[w] ? `The built-in lists end at week ${WORDS.length}, so add new words here. ` : "")
+    + "One word per line, or separate with commas.";
+  $("parent").classList.add("open");
+}
+function closeModals(){ document.querySelectorAll(".modal").forEach(m => m.classList.remove("open")); render(); }
+
+$("openParent").onclick = openParent;
+$("elLoad").onclick = async () => {
+  const key = $("elKey").value.trim();
+  if(!key){ $("elNote").textContent = "Paste your ElevenLabs API key first."; return; }
+  $("elNote").textContent = "Loading your voices...";
+  try{
+    const list = await loadVoices(key);
+    fillVoiceSelect(list);
+    $("elNote").textContent = `Found ${list.length} voices. Pick one, then save.`;
+  }catch(e){
+    $("elNote").textContent = "Couldn't reach ElevenLabs. Check the key has Text to Speech and Voices (read) turned on. The claude.ai link blocks outside connections, so use the copy on GitHub Pages or your computer.";
+  }
+};
+$("elSave").onclick = saveVoice;
+$("elTest").onclick = () => { saveVoice(); speak(wordsFor(currentWeek())[0]); };
+$("elClear").onclick = () => { $("elKey").value = ""; fillVoiceSelect([]); saveVoice(); };
+el.study.addEventListener("click", e => { if(e.target.tagName === "SPAN") speak(e.target.textContent); });
+$("closeParent").onclick = closeModals;
+$("closeAward").onclick = closeModals;
+$("seeAward").onclick = () => showAward(currentWeek());
+$("wkMinus").onclick = () => { if(currentWeek() > 1){ state.weekOffset--; save(); openParent(); } };
+$("wkPlus").onclick = () => { state.weekOffset++; save(); openParent(); };
+$("modeSee").onchange = () => { state.mode = "see"; save(); };
+$("modeHear").onchange = () => { state.mode = "hear"; save(); };
+$("saveWords").onclick = () => {
+  const list = $("wordsBox").value.toLowerCase().split(/[\s,]+/).map(s => s.replace(/[^a-z]/g, "")).filter(Boolean);
+  if(!list.length){ $("wordsNote").textContent = "Add at least one word, then save."; return; }
+  state.custom[currentWeek()] = list; save(); openParent(); toast("Words saved for this week.");
+};
+$("builtIn").onclick = () => { delete state.custom[currentWeek()]; save(); openParent(); };
+$("resetWeek").onclick = () => {
+  if(confirm("Clear all times and stars for this week?")){ delete state.weeks[currentWeek()]; save(); openParent(); }
+};
+$("resetAll").onclick = () => {
+  if(confirm("Erase all progress and start again at week 1?")){
+    state = {startMonday:ymd(mondayOf(new Date())), weekOffset:0, mode:state.mode, custom:{}, weeks:{}, voice:state.voice};
+    save(); openParent();
+  }
+};
+document.querySelectorAll(".modal").forEach(m => m.addEventListener("click", e => { if(e.target === m) closeModals(); }));
+
+/* ---------- Start ---------- */
+buildKeyboard();
+render();
+</script>
+</body>
+</html>
